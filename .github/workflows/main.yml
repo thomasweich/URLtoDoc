@@ -19,8 +19,9 @@ name: Deploy Chrome Extension
              pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client
          - name: Create ZIP file
            run: zip -r extension.zip * -x "*.git*"
+         - name Decode OAuth
+           run: echo ${{secrets.OAUTH_CLIENT_UPLOAD}} > oauth_client_file.json
          - name: Deploy to Chrome Web Store
            env:
-             CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
              EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
            run: python deploy_script.py
