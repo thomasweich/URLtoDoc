@@ -1,8 +1,8 @@
 name: Deploy Chrome Extension
-   on:
-     push:
-       tags:
-         - 'v*'
+on:
+  push:
+    tags:
+      - 'v*'
 
    jobs:
      deploy:
