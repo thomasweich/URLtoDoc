@@ -1,0 +1,23 @@
+{
+    "manifest_version": 3,
+    "name": "URL to Google Doc Appender",
+    "version": "1.0",
+    "permissions": [
+        "activeTab",
+        "storage",
+        "identity"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArnCTRwD2roM8VNsfqD6jVwx1ldwc/0+KW+cjhrYmwG1S6CyqbrIkFfnljBhpz9ueBRPLpjn6eml9zIgZBoYnzeILIsGGC+0Wd/cIORMo85F+qriqCgEmuLW3bN91ysY1hVMG12eQwSGAZD37/SBhU4NDyTaj2Jo2gXo/xphQxiXaBMe49AYlXTLuG16XrvFuQq+/mGqiTajzS1FWMwtjABEgVyIPUt80MZr8M/7XXP0TOw+Vll+xYJg5EagSi56HCF3Gd/M0Ofo4Crw8z9lJJhmUF1HdfSbGzfGhNCbWRE/vY3i3RE6Q1fAXCQKtDZswWFVogVTUbLveJkDpQFYwawIDAQAB",
+    "oauth2": {
+        "client_id": "126727248936-4k4dt231jabf9p7lt798d4ojgbdn5ifr.apps.googleusercontent.com",
+        "scopes": [
+            "https://www.googleapis.com/auth/documents"
+        ]
+    }
+}
