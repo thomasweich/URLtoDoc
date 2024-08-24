@@ -1,13 +1,36 @@
-document.getElementById('saveSettings').addEventListener('click', () => {
-    const docId = document.getElementById('docId').value;
-    chrome.storage.sync.set({ docId: docId }, () => {
-        console.log('Settings saved');
+document.addEventListener('DOMContentLoaded', function () {
+    chrome.storage.local.get('lastError', function (data) {
+        updateLastErrorDisplay(data.lastError);
     });
 });
 
 document.getElementById('appendUrl').addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        const url = tabs[0].url;
-        chrome.runtime.sendMessage({ action: "appendUrl", url: url });
+    chrome.runtime.sendMessage({ action: "appendUrl" });
+});
+
+document.getElementById('openOptions').addEventListener('click', () => {
+    chrome.runtime.openOptionsPage();
+});
+
+document.getElementById('dismissError').addEventListener('click', () => {
+    chrome.storage.local.remove('lastError', function () {
+        updateLastErrorDisplay(null);
     });
+});
+
+function updateLastErrorDisplay(error) {
+    const errorContainer = document.getElementById('errorContainer');
+    const lastErrorElement = document.getElementById('lastError');
+    if (error) {
+        lastErrorElement.textContent = "Error: " + error;
+        errorContainer.style.display = 'block';
+    } else {
+        errorContainer.style.display = 'none';
+    }
+}
+
+chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'local' && changes.lastError) {
+        updateLastErrorDisplay(changes.lastError.newValue);
+    }
 });
