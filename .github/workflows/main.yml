@@ -22,7 +22,7 @@ jobs:
         run: zip -r extension.zip * -x "*.git*"
 
       - name: Publish to Chrome Web Store
-        uses: fregante/chrome-webstore-upload@v3
+        uses: fregante/chrome-webstore-upload@v1
         with:
           client-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.CLIENT_SECRET }}
