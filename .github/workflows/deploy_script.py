@@ -3,6 +3,9 @@ import json
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
+import os
+
+extension_id = os.environ.get('EXTENSION_ID')
 
 # Set up OAuth 2.0 flow
 flow = Flow.from_client_secrets_file(
@@ -21,7 +24,7 @@ with open('extension.zip', 'rb') as file:
     media_body = file.read()
 
 response = service.items().update(
-    itemId=$EXTENSION_ID,
+    itemId=extension_id,
     body=media_body,
     media_body=media_body
 ).execute()
