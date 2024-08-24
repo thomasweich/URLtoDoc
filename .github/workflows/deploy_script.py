@@ -6,6 +6,7 @@ from googleapiclient.discovery import build
 import os
 
 extension_id = os.environ.get('EXTENSION_ID')
+version = os.environ.get('VERSION', '1.0.0')
 
 # Set up OAuth 2.0 flow
 flow = Flow.from_client_secrets_file(
