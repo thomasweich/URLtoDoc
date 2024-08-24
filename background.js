@@ -54,77 +54,111 @@ function showErrorNotification(title, message) {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === "appendUrl") {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            const activeTab = tabs[0];
-            appendToDoc(activeTab.title, activeTab.url);
-        });
-    } else if (request.action === "updateSettings") {
+    if (request.action === "updateSettings") {
         saveSettings(request.settings);
-    }
-});
+    } else {
+        loadSettings((settings) => {
+            const { docId, debug, dateFormat } = settings;
 
-function appendToDoc(title, url) {
-    loadSettings((settings) => {
-        const { docId, debug, dateFormat } = settings;
-
-        if (!docId) {
-            showErrorNotification('URL to Google Doc Appender', 'Please set a Google Doc ID in the extension options.');
-            return;
-        }
-
-        chrome.identity.getAuthToken({ interactive: true }, function (token) {
-            if (chrome.runtime.lastError) {
-                if (debug) console.error(chrome.runtime.lastError);
-                showErrorNotification('URL to Google Doc Appender', 'Error: Unable to authenticate. Please check your settings.');
+            if (!docId) {
+                showErrorNotification('URL to Google Doc Appender', 'Please set a Google Doc ID in the extension options.');
                 return;
             }
 
-            const currentDate = formatDate(new Date(), dateFormat);
-            const contentToAppend = `\n${currentDate}\n${title}\n${url}\n`;
+            if (request.action === "appendUrl") {
+                appendCurrentURL(docId, dateFormat, debug);
+            } else if (request.action === "appendAllUrls") {
+                appendAllUrls(docId, debug);
+            }
+        });
+    }
+});
 
-            const endpoint = `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`;
-            const requestBody = {
-                requests: [{
-                    insertText: {
-                        endOfSegmentLocation: { segmentId: "" },
-                        text: contentToAppend
-                    }
-                }]
-            };
-
-            fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + token,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestBody)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    if (debug) {
-                        console.log('Response status:', response.status);
-                        console.log('Response headers:', response.headers);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (debug) {
-                        console.log('Response data:', data);
-                        console.log('URL appended successfully');
-                    }
-                    setBadgeStatus(true);
-                })
-                .catch(error => {
-                    if (debug) console.error('Error:', error);
-                    showErrorNotification('URL to Google Doc Appender', 'Error appending URL. Please check your settings and try again.');
-                });
+function getAllTabUrls() {
+    return new Promise((resolve, reject) => {
+        chrome.tabs.query({ currentWindow: true }, (tabs) => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+            } else {
+                const urls = tabs.map(tab => tab.url);
+                resolve(urls);
+            }
         });
     });
 }
+
+function appendAllUrls(docId, debug) {
+    getAllTabUrls()
+        .then(urls => {
+            const content = '\n' + urls.join('\n') + '\n';
+            appendToDoc(content, docId, debug);
+        })
+        .catch(error => {
+            if (debug) console.error('Error getting tab URLs:', error);
+            showErrorNotification('Error getting tab URLs: ', error.message);
+        });
+}
+
+
+function appendCurrentURL(docId, dateFormat, debug) {
+    const currentDate = formatDate(new Date(), dateFormat);
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const activeTab = tabs[0];
+        const contentToAppend = `\n${currentDate}\n${activeTab.title}\n${activeTab.url}\n`;
+        appendToDoc(contentToAppend, docId, debug);
+    });
+}
+
+function appendToDoc(contentToAppend, docId, debug) {
+    chrome.identity.getAuthToken({ interactive: true }, function (token) {
+        if (chrome.runtime.lastError) {
+            if (debug) console.error(chrome.runtime.lastError);
+            showErrorNotification('URL to Google Doc Appender', 'Error: Unable to authenticate. Please check your settings.');
+            return;
+        }
+
+        const endpoint = `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`;
+        const requestBody = {
+            requests: [{
+                insertText: {
+                    endOfSegmentLocation: { segmentId: "" },
+                    text: contentToAppend
+                }
+            }]
+        };
+
+        fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                if (debug) {
+                    console.log('Response status:', response.status);
+                    console.log('Response headers:', response.headers);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (debug) {
+                    console.log('Response data:', data);
+                    console.log('URL appended successfully');
+                }
+                setBadgeStatus(true);
+            })
+            .catch(error => {
+                if (debug) console.error('Error:', error);
+                showErrorNotification('URL to Google Doc Appender', 'Error appending URL. Please check your settings and try again.');
+            });
+    });
+}
+
 
 function formatDate(date, format) {
     const pad = (num) => (num < 10 ? '0' + num : num);
@@ -147,9 +181,6 @@ function formatDate(date, format) {
 // Handle keyboard shortcut
 chrome.commands.onCommand.addListener((command) => {
     if (command === "append_url") {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            const activeTab = tabs[0];
-            appendToDoc(activeTab.title, activeTab.url);
-        });
+        appendCurrentURL();
     }
 });

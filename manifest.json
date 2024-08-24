@@ -6,7 +6,8 @@
         "activeTab",
         "storage",
         "identity",
-        "notifications"
+        "notifications",
+        "tabs"
     ],
     "host_permissions": [
         "https://docs.googleapis.com/"

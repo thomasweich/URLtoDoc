@@ -8,6 +8,10 @@ document.getElementById('appendUrl').addEventListener('click', () => {
     chrome.runtime.sendMessage({ action: "appendUrl" });
 });
 
+document.getElementById('appendAllUrls').addEventListener('click', () => {
+    chrome.runtime.sendMessage({ action: "appendAllUrls" });
+});
+
 document.getElementById('openOptions').addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
 });
