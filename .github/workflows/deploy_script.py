@@ -6,7 +6,7 @@ from googleapiclient.discovery import build
 
 # Set up OAuth 2.0 flow
 flow = Flow.from_client_secrets_file(
-    'path/to/client_secret.json',
+    'oauth_client_file.json',
     scopes=['https://www.googleapis.com/auth/chromewebstore']
 )
 
@@ -17,11 +17,11 @@ creds = flow.run_local_server(port=0)
 service = build('chromewebstore', 'v1.1', credentials=creds)
 
 # Upload the ZIP file
-with open('path/to/extension.zip', 'rb') as file:
+with open('extension.zip', 'rb') as file:
     media_body = file.read()
 
 response = service.items().update(
-    itemId='your_extension_id',
+    itemId=$EXTENSION_ID,
     body=media_body,
     media_body=media_body
 ).execute()
