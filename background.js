@@ -42,14 +42,6 @@ function setBadgeStatus(isSuccess) {
 // Show notification
 function showErrorNotification(title, message) {
     storeLastError(message);
-    chrome.notifications.create(
-        {
-            type: 'basic',
-            iconUrl: 'icon128.png',
-            title: title,
-            message: message,
-            priority: 2
-        });
     setBadgeStatus(false);
 }
 

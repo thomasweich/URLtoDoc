@@ -6,7 +6,6 @@
         "activeTab",
         "storage",
         "identity",
-        "notifications",
         "tabs"
     ],
     "host_permissions": [
