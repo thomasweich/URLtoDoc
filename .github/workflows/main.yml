@@ -12,29 +12,22 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v2
         with:
-          python-version: '3.x'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install google-auth-oauthlib google-auth-httplib2 \
-          google-api-python-client
+          node-version: '14'
 
       - name: Create ZIP file
         run: zip -r extension.zip * -x "*.git*"
 
-      - name: Decode OAuth
-        run: |
-          echo ${{ secrets.OAUTH_CLIENT_UPLOAD }} | \
-          base64 --decode > oauth_client_file.json
-
-      - name: Deploy to Chrome Web Store
-        env:
-          EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
-          VERSION_ID: ${{ github.event.input.version }}
-        run: python .github/workflows/deploy_script.py
+      - name: Publish to Chrome Web Store
+        uses: fregante/chrome-webstore-upload@v1
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.CLIENT_SECRET }}
+          refresh-token: ${{ secrets.REFRESH_TOKEN }}
+          extension-id: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
+          source: './extension.zip'
