@@ -37,4 +37,4 @@ jobs:
       - name: Deploy to Chrome Web Store
         env:
           EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
-        run: python deploy_script.py
+        run: python .github/workflows/deploy_script.py
