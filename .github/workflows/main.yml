@@ -1,0 +1,26 @@
+name: Deploy Chrome Extension
+   on:
+     push:
+       tags:
+         - 'v*'
+
+   jobs:
+     deploy:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: actions/checkout@v2
+         - name: Set up Python
+           uses: actions/setup-python@v2
+           with:
+             python-version: '3.x'
+         - name: Install dependencies
+           run: |
+             python -m pip install --upgrade pip
+             pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client
+         - name: Create ZIP file
+           run: zip -r extension.zip * -x "*.git*"
+         - name: Deploy to Chrome Web Store
+           env:
+             CLIENT_SECRET: ${{ secrets.CHROME_WEBSTORE_CLIENT_SECRET }}
+             EXTENSION_ID: ${{ secrets.CHROME_WEBSTORE_EXTENSION_ID }}
+           run: python deploy_script.py
